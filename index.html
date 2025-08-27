@@ -20,8 +20,6 @@
       <label for="guru" class="block text-gray-700 font-medium mb-2">Pilih Guru</label>
       <select id="guru" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400">
         <option value="">-- Pilih Guru --</option>
-        <option value="guru1">Guru 1</option>
-        <option value="guru2">Guru 2</option>
       </select>
     </div>
 
@@ -32,6 +30,7 @@
         <option value="">-- Pilih Kelas --</option>
         <option value="kelas7">Kelas 7</option>
         <option value="kelas8">Kelas 8</option>
+        <option value="kelas9">Kelas 9</option>
       </select>
     </div>
 
@@ -82,6 +81,27 @@
 const SHEET_ID = "1Tf8SImFnzrvNKAd7L5OPozyIvaQfDDgozzHMirQ-ms0";
 const SHEET_NAME = "data";
 
+// Load daftar guru dari kolom A2 ke bawah
+function loadGuruDropdown() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+  fetch(url)
+    .then(res => res.text())
+    .then(rep => {
+      const data = JSON.parse(rep.substr(47).slice(0, -2));
+      const select = document.getElementById("guru");
+      data.table.rows.forEach(r => {
+        const guru = r.c[0] ? r.c[0].v : null;
+        if (guru) {
+          const option = document.createElement("option");
+          option.value = guru;
+          option.textContent = guru;
+          select.appendChild(option);
+        }
+      });
+    });
+}
+
+// Load daftar dokumen dari kolom A-D
 function loadDokumen() {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
   fetch(url)
@@ -111,9 +131,7 @@ function loadDokumen() {
     });
 }
 
-// Panggil saat halaman dibuka
-loadDokumen();
-
+// Simulasi upload dokumen
 function uploadDokumen() {
   const guru = document.getElementById("guru").value;
   const kelas = document.getElementById("kelas").value;
@@ -128,12 +146,10 @@ function uploadDokumen() {
     return;
   }
 
-  // Simulasi upload sukses
   notif.className = "mt-4 p-4 rounded-lg shadow w-full text-center bg-green-100 text-green-700";
   notif.textContent = `✅ Dokumen "${judul}" berhasil diupload untuk ${guru} - ${kelas}.`;
   notif.classList.remove("hidden");
 
-  // Tambahkan ke tabel sementara tanpa reload
   const tbody = document.getElementById("dokumenBody");
   const tr = document.createElement("tr");
   tr.innerHTML = `
@@ -144,9 +160,12 @@ function uploadDokumen() {
   `;
   tbody.appendChild(tr);
 
-  // Reset form
   document.getElementById("uploadForm").reset();
 }
+
+// Panggil saat halaman dibuka
+loadGuruDropdown();
+loadDokumen();
 </script>
 
 </body>
